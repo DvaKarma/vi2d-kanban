@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd'
-import { RefreshCw, AlertCircle, Search, Plus } from 'lucide-react'
+import { RefreshCw, AlertCircle, Search, Plus, Archive } from 'lucide-react'
 import KanbanColumn, { COLUMN_LABEL, COLUMN_COLOR } from './KanbanColumn'
+import ArchiveView from './ArchiveView'
 import TaskModal from './TaskModal'
 import { api } from '@/lib/api'
 import type { Task, Responsavel, ColumnName, TaskCreate, TaskUpdate } from '@/lib/api'
+import { groupArchivedByMonth } from '@/lib/archive'
 
 const COLUMNS: ColumnName[] = ['backlog', 'stand_by', 'a_fazer', 'em_andamento', 'concluido', 'nao_concluido']
 
@@ -32,6 +34,7 @@ function useIsMobile(breakpointPx = 768) {
 
 export default function KanbanBoard() {
   const [filtro, setFiltro] = useState<Filtro>('todos')
+  const [showArchive, setShowArchive] = useState(false)
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -246,6 +249,19 @@ export default function KanbanBoard() {
               ))}
             </div>
 
+            <button
+              onClick={() => setShowArchive(v => !v)}
+              className={`flex items-center gap-1.5 px-3 py-2 md:py-1.5 rounded-lg text-sm font-medium border transition-all ${
+                showArchive
+                  ? 'bg-[#00e5ff] text-[#050c1a] border-[#00e5ff]'
+                  : 'bg-[#0a1628] text-[#7a9bbf] border-[rgba(0,229,255,0.12)] hover:text-[#e8f4f8]'
+              }`}
+              title="Arquivo mensal (concluídas e não concluídas)"
+            >
+              <Archive size={14} />
+              <span className="hidden sm:inline">Arquivo</span>
+            </button>
+
             <div className="relative flex-1 md:flex-none">
               <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#7a9bbf] pointer-events-none" />
               <input
@@ -297,6 +313,12 @@ export default function KanbanBoard() {
               <span className="text-sm">Carregando tasks...</span>
             </div>
           </div>
+        ) : showArchive ? (
+          <ArchiveView
+            groups={groupArchivedByMonth(visibleTasks)}
+            onEdit={openEdit}
+            onDelete={handleDelete}
+          />
         ) : isMobile ? (
           <>
             {/* Indicador de coluna */}
