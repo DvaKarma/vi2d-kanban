@@ -16,6 +16,7 @@ interface Props {
 
 const COLUMNS: { value: ColumnName; label: string }[] = [
   { value: 'backlog', label: 'Backlog' },
+  { value: 'stand_by', label: 'Stand-By' },
   { value: 'a_fazer', label: 'A Fazer' },
   { value: 'em_andamento', label: 'Em Andamento' },
   { value: 'concluido', label: 'Concluído' },

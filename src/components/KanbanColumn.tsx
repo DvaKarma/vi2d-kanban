@@ -7,6 +7,7 @@ import type { Task } from '@/lib/api'
 
 export const COLUMN_LABEL: Record<Task['column_name'], string> = {
   backlog: 'Backlog',
+  stand_by: 'Stand-By',
   a_fazer: 'A Fazer',
   em_andamento: 'Em Andamento',
   concluido: 'Concluído',
@@ -14,11 +15,11 @@ export const COLUMN_LABEL: Record<Task['column_name'], string> = {
 }
 
 // Cor de identidade de cada coluna — usada nas badges de contagem (aqui e
-// no indicador mobile). "Não Concluído" usa o azul-acinzentado neutro já
-// existente na paleta (--muted), não vermelho/verde, pra não parecer erro
-// nem sucesso.
+// no indicador mobile). "Não Concluído" e "Stand-By" usam cores neutras,
+// não vermelho/verde, pra não parecer erro nem sucesso.
 export const COLUMN_COLOR: Record<Task['column_name'], string> = {
   backlog: '#00e5ff',
+  stand_by: '#9b8fb0',
   a_fazer: '#00e5ff',
   em_andamento: '#00e5ff',
   concluido: '#00e5ff',

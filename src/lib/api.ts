@@ -1,7 +1,7 @@
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? '/api'
 
 export type Responsavel = 'vinicius' | 'igor'
-export type ColumnName = 'backlog' | 'a_fazer' | 'em_andamento' | 'concluido' | 'nao_concluido'
+export type ColumnName = 'backlog' | 'stand_by' | 'a_fazer' | 'em_andamento' | 'concluido' | 'nao_concluido'
 export type Priority = 'baixa' | 'media' | 'alta'
 
 export interface ChecklistItem {

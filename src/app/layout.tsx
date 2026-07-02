@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Kanban — VNCTEC',
-  description: 'Kanban pessoal self-hosted',
+  title: 'Kanban — VI2D',
+  description: 'Kanban compartilhado VI2D self-hosted',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

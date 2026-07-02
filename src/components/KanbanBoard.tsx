@@ -8,7 +8,7 @@ import TaskModal from './TaskModal'
 import { api } from '@/lib/api'
 import type { Task, Responsavel, ColumnName, TaskCreate, TaskUpdate } from '@/lib/api'
 
-const COLUMNS: ColumnName[] = ['backlog', 'a_fazer', 'em_andamento', 'concluido', 'nao_concluido']
+const COLUMNS: ColumnName[] = ['backlog', 'stand_by', 'a_fazer', 'em_andamento', 'concluido', 'nao_concluido']
 
 type Filtro = 'todos' | Responsavel
 
