@@ -1,0 +1,9 @@
+[build]
+  command = "next build"
+  publish = ".next"
+
+[[redirects]]
+  from = "/api/*"
+  to = "http://124.198.135.12:8001/:splat"
+  status = 200
+  force = true
