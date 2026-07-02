@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { X, Trash2, AlertTriangle, Plus, CheckSquare, Square, CheckCircle2, Clock } from 'lucide-react'
+import { X, Trash2, AlertTriangle, Plus, CheckSquare, Square, CheckCircle2, Clock, Paperclip, Download, Loader2 } from 'lucide-react'
 import { api } from '@/lib/api'
-import type { Task, TaskCreate, TaskUpdate, Responsavel, ColumnName, Priority, ChecklistItem, AtividadeItem } from '@/lib/api'
+import type { Task, TaskCreate, TaskUpdate, Responsavel, ColumnName, Priority, ChecklistItem, AtividadeItem, Anexo } from '@/lib/api'
 
 interface Props {
   task: Task | null
@@ -45,6 +45,12 @@ function formatDate(iso: string) {
   }
 }
 
+function formatBytes(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
 const INPUT =
   'w-full bg-[#050c1a] border border-[rgba(0,229,255,0.15)] rounded-lg px-3 py-2.5 text-sm text-[#e8f4f8] placeholder-[#7a9bbf] focus:outline-none focus:border-[#00e5ff] transition-colors'
 
@@ -63,6 +69,9 @@ export default function TaskModal({ task, defaultColumn, defaultResponsavel, onS
   const [dismissedSuggestion, setDismissedSuggestion] = useState(false)
   const [atividade, setAtividade] = useState<AtividadeItem[]>([])
   const [atividadeLoading, setAtividadeLoading] = useState(false)
+  const [anexos, setAnexos] = useState<Anexo[]>([])
+  const [uploadingAnexo, setUploadingAnexo] = useState(false)
+  const [anexoError, setAnexoError] = useState('')
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -78,6 +87,7 @@ export default function TaskModal({ task, defaultColumn, defaultResponsavel, onS
       setDueDate(task.due_date ?? '')
       setTags(task.tags ?? '')
       setChecklist(task.checklist ?? [])
+      setAnexos(task.anexos ?? [])
     } else {
       setTitle('')
       setDescription('')
@@ -87,11 +97,13 @@ export default function TaskModal({ task, defaultColumn, defaultResponsavel, onS
       setDueDate('')
       setTags('')
       setChecklist([])
+      setAnexos([])
     }
     setNewChecklistItem('')
     setDismissedSuggestion(false)
     setConfirmDelete(false)
     setError('')
+    setAnexoError('')
   }, [task, defaultColumn, defaultResponsavel])
 
   const addChecklistItem = () => {
@@ -113,6 +125,35 @@ export default function TaskModal({ task, defaultColumn, defaultResponsavel, onS
     setResponsavel(prev =>
       prev.includes(value) ? prev.filter(r => r !== value) : [...prev, value]
     )
+  }
+
+  const handleUploadAnexo = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file || !task) return
+    setUploadingAnexo(true)
+    setAnexoError('')
+    try {
+      const anexo = await api.uploadAnexo(task.id, file)
+      setAnexos(prev => [...prev, anexo])
+    } catch {
+      setAnexoError('Erro ao enviar anexo (verifique o limite de 2GB).')
+    } finally {
+      setUploadingAnexo(false)
+    }
+  }
+
+  const handleDeleteAnexo = async (anexo: Anexo) => {
+    if (!task) return
+    const filename = anexo.url.split('/').pop()
+    if (!filename) return
+    setAnexoError('')
+    try {
+      await api.deleteAnexo(task.id, filename)
+      setAnexos(prev => prev.filter(a => a.url !== anexo.url))
+    } catch {
+      setAnexoError('Erro ao excluir anexo.')
+    }
   }
 
   const checklistDone = checklist.length > 0 && checklist.every(i => i.feito)
@@ -335,6 +376,59 @@ export default function TaskModal({ task, defaultColumn, defaultResponsavel, onS
                     ))}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Anexos — só aparece editando (upload precisa do id da task) */}
+            {task && (
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className={LABEL}>Anexos</label>
+                  <label className="flex items-center gap-1 text-xs text-[#00e5ff] hover:text-[#5eeeff] cursor-pointer transition-colors">
+                    {uploadingAnexo ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />}
+                    {uploadingAnexo ? 'Enviando...' : 'Adicionar'}
+                    <input type="file" className="hidden" onChange={handleUploadAnexo} disabled={uploadingAnexo} />
+                  </label>
+                </div>
+
+                {anexos.length > 0 && (
+                  <div className="space-y-0.5">
+                    {anexos.map(anexo => (
+                      <div
+                        key={anexo.url}
+                        className="group/item flex items-center gap-2 px-1 py-1.5 rounded-lg hover:bg-[rgba(0,229,255,0.05)]"
+                      >
+                        <Paperclip size={13} className="text-[#7a9bbf] shrink-0" />
+                        <a
+                          href={api.anexoUrl(anexo.url)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 min-w-0 text-sm text-[#e8f4f8] hover:text-[#00e5ff] truncate transition-colors"
+                        >
+                          {anexo.nome}
+                        </a>
+                        <span className="text-[10px] text-[#7a9bbf] shrink-0">{formatBytes(anexo.tamanho)}</span>
+                        <a
+                          href={api.anexoUrl(anexo.url)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="shrink-0 p-1 text-[#7a9bbf] hover:text-[#00e5ff] transition-colors"
+                        >
+                          <Download size={13} />
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteAnexo(anexo)}
+                          className="shrink-0 p-1 rounded opacity-100 md:opacity-0 md:group-hover/item:opacity-100 text-[#7a9bbf] hover:text-red-400 transition-all"
+                        >
+                          <X size={13} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {anexoError && <p className="text-xs text-red-400 mt-1">{anexoError}</p>}
               </div>
             )}
 

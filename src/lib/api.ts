@@ -15,6 +15,13 @@ export interface AtividadeItem {
   texto: string
 }
 
+export interface Anexo {
+  nome: string
+  url: string
+  tamanho: number
+  criado_em: string
+}
+
 export interface Task {
   id: number
   title: string
@@ -26,6 +33,7 @@ export interface Task {
   tags: string
   position: number
   checklist?: ChecklistItem[]
+  anexos?: Anexo[]
   created_at: string
   updated_at: string
 }
@@ -56,4 +64,14 @@ export const api = {
     request<void>(`/tasks/${id}`, { method: 'DELETE' }),
   getAtividade: (id: number) =>
     request<AtividadeItem[]>(`/tasks/${id}/atividade`),
+  uploadAnexo: async (taskId: number, file: File) => {
+    const form = new FormData()
+    form.append('file', file)
+    const res = await fetch(`${BASE}/tasks/${taskId}/anexos`, { method: 'POST', body: form })
+    if (!res.ok) throw new Error(`API ${res.status}: ${res.statusText}`)
+    return res.json() as Promise<Anexo>
+  },
+  deleteAnexo: (taskId: number, filename: string) =>
+    request<void>(`/tasks/${taskId}/anexos/${encodeURIComponent(filename)}`, { method: 'DELETE' }),
+  anexoUrl: (path: string) => `${BASE}${path}`,
 }

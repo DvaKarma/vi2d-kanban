@@ -37,6 +37,7 @@ export default function TaskCard({ task, index, onEdit, onDelete, mobile, onMove
   const isOverdue = task.due_date && new Date(task.due_date) < new Date(new Date().toDateString())
   const checklist = task.checklist ?? []
   const checklistDone = checklist.filter(i => i.feito).length
+  const anexos = task.anexos ?? []
 
   const cardClasses = (dragging: boolean) => `
     group relative rounded-lg p-3 mb-2 border transition-all select-none cursor-pointer
@@ -108,6 +109,12 @@ export default function TaskCard({ task, index, onEdit, onDelete, mobile, onMove
           {checklist.length > 0 && (
             <span className="text-[10px] px-1.5 py-0.5 rounded bg-[rgba(0,229,255,0.08)] text-[#00e5ff]">
               ✓ {checklistDone}/{checklist.length}
+            </span>
+          )}
+
+          {anexos.length > 0 && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[rgba(0,229,255,0.08)] text-[#00e5ff]">
+              📎 {anexos.length}
             </span>
           )}
 
