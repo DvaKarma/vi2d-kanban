@@ -106,10 +106,13 @@ Frontend no Netlify (deploy automático via GitHub). API no servidor VNCTEC, rod
 - [ ] Deletar task (botão no card ou no modal)
 - [ ] Persistência real via API (não localStorage)
 
+### Implementado pós-MVP
+- **Anexos de arquivo** — upload/download/remoção por task (`POST/DELETE /tasks/{id}/anexos`, servidos em `/uploads`), coluna `anexos` JSONB.
+- **Arquivamento mensal** — view read-only no frontend agrupando concluídas/não-concluídas por mês.
+- **Assistente Telegram** — `vi2d-assistente` ("Rick Sanchez - VI2D"), bot de grupo (Vinicius + Igor).
+
 ### Fora do MVP (não implementar agora)
 - **Autenticação/login** — dívida técnica conhecida e aceita para este MVP, não um esquecimento. Board fica acessível sem login enquanto for uso restrito aos dois sócios.
-- Anexos de arquivo
-- Arquivamento mensal
 - Múltiplos boards/projetos
 
 ---
