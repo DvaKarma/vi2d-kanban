@@ -39,7 +39,6 @@ export const ORIGENS: { id: Origem; nome: string; cor: string }[] = [
   { id: 'pa', nome: 'PA', cor: '#f4801e' },
   { id: 'vnctec', nome: 'VNC', cor: '#5b8def' },
   { id: 'pessoal', nome: 'Pessoal', cor: '#a78bfa' },
-  { id: 'google', nome: 'Google', cor: '#9aa8bd' },
 ]
 
 export const corDa = (o: Origem) => ORIGENS.find(x => x.id === o)?.cor ?? '#9aa8bd'
