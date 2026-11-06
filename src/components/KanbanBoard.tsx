@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd'
-import { RefreshCw, AlertCircle, Search, Plus, Archive } from 'lucide-react'
+import { RefreshCw, AlertCircle, Search, Plus, Archive, CalendarDays } from 'lucide-react'
 import KanbanColumn, { COLUMN_LABEL, COLUMN_COLOR } from './KanbanColumn'
 import ArchiveView from './ArchiveView'
+import AgendaView from './AgendaView'
 import TaskModal from './TaskModal'
 import { api } from '@/lib/api'
 import type { Task, Responsavel, ColumnName, TaskCreate, TaskUpdate } from '@/lib/api'
@@ -35,6 +36,7 @@ function useIsMobile(breakpointPx = 768) {
 export default function KanbanBoard() {
   const [filtro, setFiltro] = useState<Filtro>('todos')
   const [showArchive, setShowArchive] = useState(false)
+  const [showAgenda, setShowAgenda] = useState(false)
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -250,7 +252,7 @@ export default function KanbanBoard() {
             </div>
 
             <button
-              onClick={() => setShowArchive(v => !v)}
+              onClick={() => { setShowArchive(v => !v); setShowAgenda(false) }}
               className={`flex items-center gap-1.5 px-3 py-2 md:py-1.5 rounded-lg text-sm font-medium border transition-all ${
                 showArchive
                   ? 'bg-[#00e5ff] text-[#050c1a] border-[#00e5ff]'
@@ -260,6 +262,19 @@ export default function KanbanBoard() {
             >
               <Archive size={14} />
               <span className="hidden sm:inline">Arquivo</span>
+            </button>
+
+            <button
+              onClick={() => { setShowAgenda(v => !v); setShowArchive(false) }}
+              className={`flex items-center gap-1.5 px-3 py-2 md:py-1.5 rounded-lg text-sm font-medium border transition-all ${
+                showAgenda
+                  ? 'bg-[#00e5ff] text-[#050c1a] border-[#00e5ff]'
+                  : 'bg-[#0a1628] text-[#7a9bbf] border-[rgba(0,229,255,0.12)] hover:text-[#e8f4f8]'
+              }`}
+              title="Agenda (VI2D, VNC e Google Agenda)"
+            >
+              <CalendarDays size={14} />
+              <span className="hidden sm:inline">Agenda</span>
             </button>
 
             <div className="relative flex-1 md:flex-none">
@@ -306,7 +321,9 @@ export default function KanbanBoard() {
           </div>
         )}
 
-        {loading && tasks.length === 0 ? (
+        {showAgenda ? (
+          <AgendaView tasks={tasks} isMobile={isMobile} onOpenTask={openEdit} />
+        ) : loading && tasks.length === 0 ? (
           <div className="flex items-center justify-center h-64">
             <div className="flex flex-col items-center gap-3 text-[#7a9bbf]">
               <RefreshCw size={24} className="animate-spin text-[#00e5ff]" />

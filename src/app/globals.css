@@ -41,3 +41,38 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 229, 255, 0.4);
 }
+
+/* Aba Agenda (FullCalendar) no tema VI2D */
+.agenda-vi2d {
+  --fc-border-color: rgba(0, 229, 255, 0.08);
+  --fc-page-bg-color: #0a1628;
+  --fc-neutral-bg-color: #0f1f38;
+  --fc-list-event-hover-bg-color: #0f1f38;
+  --fc-today-bg-color: rgba(0, 229, 255, 0.06);
+  --fc-now-indicator-color: #00e5ff;
+  --fc-button-bg-color: #0f1f38;
+  --fc-button-border-color: rgba(0, 229, 255, 0.15);
+  --fc-button-text-color: #e8f4f8;
+  --fc-button-hover-bg-color: #13284a;
+  --fc-button-hover-border-color: rgba(0, 229, 255, 0.3);
+  --fc-button-active-bg-color: #00e5ff;
+  --fc-button-active-border-color: #00e5ff;
+  --fc-event-text-color: #050c1a;
+  font-size: 0.8rem;
+}
+.agenda-vi2d .fc .fc-button-primary:not(:disabled).fc-button-active { color: #050c1a; }
+.agenda-vi2d .fc .fc-toolbar-title { font-size: 1rem; font-weight: 600; text-transform: capitalize; }
+.agenda-vi2d .fc .fc-col-header-cell-cushion,
+.agenda-vi2d .fc .fc-daygrid-day-number,
+.agenda-vi2d .fc .fc-timegrid-slot-label-cushion,
+.agenda-vi2d .fc .fc-list-day-cushion { color: #7a9bbf; text-transform: capitalize; }
+.agenda-vi2d .fc .fc-event { cursor: pointer; font-weight: 500; }
+.agenda-vi2d .fc .fc-daygrid-dot-event .fc-event-title,
+.agenda-vi2d .fc .fc-daygrid-dot-event .fc-event-time,
+.agenda-vi2d .fc .fc-list-event-title,
+.agenda-vi2d .fc .fc-list-event-time { color: #e8f4f8; }
+.agenda-vi2d .fc .ev-feito { opacity: 0.45; }
+.agenda-vi2d .fc .ev-feito .fc-event-title { text-decoration: line-through; }
+.agenda-vi2d .fc .fc-list-empty { background: transparent; color: #7a9bbf; }
+.agenda-vi2d .fc .fc-popover { background: #0f1f38; border-color: rgba(0, 229, 255, 0.15); }
+.agenda-vi2d .fc .fc-popover-header { background: #0a1628; color: #e8f4f8; }
