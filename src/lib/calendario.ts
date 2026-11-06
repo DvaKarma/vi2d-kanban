@@ -39,7 +39,6 @@ export const ORIGENS: { id: Origem; nome: string; cor: string }[] = [
   { id: 'pa', nome: 'PA', cor: '#f4801e' },
   { id: 'vnctec', nome: 'VNC', cor: '#5b8def' },
   { id: 'pessoal', nome: 'Pessoal', cor: '#a78bfa' },
-  { id: 'casa', nome: 'Casa', cor: '#f472b6' },
   { id: 'google', nome: 'Google', cor: '#9aa8bd' },
 ]
 
