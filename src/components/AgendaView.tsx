@@ -9,10 +9,10 @@ import ptBr from '@fullcalendar/core/locales/pt-br'
 import type { EventClickArg, DatesSetArg, EventInput } from '@fullcalendar/core'
 import { addDays, format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { X, Video, ExternalLink, KeyRound, RefreshCw, AlertCircle, LogOut, Repeat } from 'lucide-react'
-import type { Task } from '@/lib/api'
+import { X, Video, ExternalLink, RefreshCw, AlertCircle, Repeat } from 'lucide-react'
+import type { Task, Usuario } from '@/lib/api'
 import {
-  ORIGENS, corDa, nomeDa, buscarAgenda, lerChave, gravarChave, SemChave,
+  ORIGENS, corDa, nomeDa, buscarAgenda,
   type ItemAgenda, type Origem,
 } from '@/lib/calendario'
 
@@ -22,7 +22,7 @@ const TODAS = ORIGENS.map(o => o.id)
 function lerCamadas(): Origem[] {
   try {
     const v = JSON.parse(localStorage.getItem(CAMADAS_LS) ?? 'null')
-    return Array.isArray(v) ? v : TODAS
+    return Array.isArray(v) ? v.filter((o: Origem) => TODAS.includes(o)) : TODAS
   } catch { return TODAS }
 }
 
@@ -36,13 +36,12 @@ function quandoTexto(i: ItemAgenda) {
 interface Props {
   tasks: Task[]
   isMobile: boolean
+  usuario: Usuario
   onOpenTask: (t: Task) => void
 }
 
-export default function AgendaView({ tasks, isMobile, onOpenTask }: Props) {
-  const [chave, setChave] = useState('')
-  const [digitada, setDigitada] = useState('')
-  const [pedeChave, setPedeChave] = useState(false)
+export default function AgendaView({ tasks, isMobile, usuario, onOpenTask }: Props) {
+  const origensVisiveis = ORIGENS.filter(o => usuario.papel === 'dono' || !o.soDono)
   const [camadas, setCamadas] = useState<Origem[]>(TODAS)
   const [range, setRange] = useState<{ de: string; ate: string } | null>(null)
   const [itens, setItens] = useState<ItemAgenda[]>([])
@@ -51,34 +50,22 @@ export default function AgendaView({ tasks, isMobile, onOpenTask }: Props) {
   const [carregando, setCarregando] = useState(false)
   const [aberto, setAberto] = useState<ItemAgenda | null>(null)
 
-  useEffect(() => {
-    const c = lerChave()
-    setChave(c)
-    setPedeChave(!c)
-    setCamadas(lerCamadas())
-  }, [])
+  useEffect(() => { setCamadas(lerCamadas()) }, [])
 
   const carregar = useCallback(async () => {
-    if (!range || !chave) return
+    if (!range) return
     setCarregando(true)
     setErro('')
     try {
-      const r = await buscarAgenda(range.de, range.ate, chave)
+      const r = await buscarAgenda(range.de, range.ate)
       setItens(r.itens)
       setAvisos(r.avisos)
-    } catch (e) {
-      if (e instanceof SemChave) {
-        gravarChave('')
-        setChave('')
-        setPedeChave(true)
-        setErro('Chave inválida.')
-      } else {
-        setErro('Não foi possível carregar a agenda. Verifique se o servidor está online.')
-      }
+    } catch {
+      setErro('Não foi possível carregar a agenda. Verifique se o servidor está online.')
     } finally {
       setCarregando(false)
     }
-  }, [range, chave])
+  }, [range])
 
   useEffect(() => { carregar() }, [carregar])
 
@@ -122,57 +109,12 @@ export default function AgendaView({ tasks, isMobile, onOpenTask }: Props) {
     setAberto(a.event.extendedProps.item as ItemAgenda)
   }
 
-  const entrar = (e: React.FormEvent) => {
-    e.preventDefault()
-    const v = digitada.trim()
-    if (!v) return
-    gravarChave(v)
-    setChave(v)
-    setDigitada('')
-    setPedeChave(false)
-  }
-
-  const sair = () => {
-    gravarChave('')
-    setChave('')
-    setItens([])
-    setPedeChave(true)
-  }
-
-  if (pedeChave) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <form onSubmit={entrar} className="w-full max-w-sm bg-[#0a1628] border border-[rgba(0,229,255,0.15)] rounded-xl p-6 space-y-4">
-          <div className="flex items-center gap-2 text-[#e8f4f8]">
-            <KeyRound size={16} className="text-[#00e5ff]" />
-            <h2 className="font-semibold">Agenda</h2>
-          </div>
-          <p className="text-sm text-[#7a9bbf]">
-            Digite a chave da agenda. Ela fica salva só neste navegador.
-          </p>
-          {erro && <p className="text-sm text-red-400">{erro}</p>}
-          <input
-            type="password"
-            value={digitada}
-            onChange={e => setDigitada(e.target.value)}
-            autoFocus
-            className="w-full bg-[#050c1a] border border-[rgba(0,229,255,0.15)] rounded-lg px-3 py-2 text-sm text-[#e8f4f8] focus:outline-none focus:border-[#00e5ff]"
-            placeholder="Chave"
-          />
-          <button type="submit" className="w-full bg-[#00e5ff] text-[#050c1a] font-medium rounded-lg py-2 text-sm hover:opacity-90">
-            Entrar
-          </button>
-        </form>
-      </div>
-    )
-  }
-
   const taskDoItem = aberto?.board === 'vi2d' ? tasks.find(t => t.id === aberto.id) : undefined
 
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-1.5 flex-wrap">
-        {ORIGENS.map(o => {
+        {origensVisiveis.map(o => {
           const ligada = camadas.includes(o.id)
           return (
             <button
@@ -193,10 +135,6 @@ export default function AgendaView({ tasks, isMobile, onOpenTask }: Props) {
           <button onClick={carregar} disabled={carregando} title="Recarregar agenda"
             className="p-1.5 rounded-lg text-[#7a9bbf] hover:text-[#00e5ff] disabled:opacity-40">
             <RefreshCw size={14} className={carregando ? 'animate-spin' : ''} />
-          </button>
-          <button onClick={sair} title="Sair da agenda neste navegador"
-            className="p-1.5 rounded-lg text-[#7a9bbf] hover:text-[#00e5ff]">
-            <LogOut size={14} />
           </button>
         </div>
       </div>

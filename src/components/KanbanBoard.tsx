@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd'
-import { RefreshCw, AlertCircle, Search, Plus, Archive, CalendarDays } from 'lucide-react'
+import { RefreshCw, AlertCircle, Search, Plus, Archive, CalendarDays, KeyRound, LogOut } from 'lucide-react'
 import KanbanColumn, { COLUMN_LABEL, COLUMN_COLOR } from './KanbanColumn'
 import ArchiveView from './ArchiveView'
 import AgendaView from './AgendaView'
+import TrocarSenhaModal from './TrocarSenhaModal'
 import TaskModal from './TaskModal'
 import { api } from '@/lib/api'
-import type { Task, Responsavel, ColumnName, TaskCreate, TaskUpdate } from '@/lib/api'
+import type { Task, Responsavel, ColumnName, TaskCreate, TaskUpdate, Usuario } from '@/lib/api'
 import { groupArchivedByMonth } from '@/lib/archive'
 
 const COLUMNS: ColumnName[] = ['backlog', 'stand_by', 'a_fazer', 'em_andamento', 'concluido', 'nao_concluido']
@@ -33,7 +34,8 @@ function useIsMobile(breakpointPx = 768) {
   return isMobile
 }
 
-export default function KanbanBoard() {
+export default function KanbanBoard({ usuario, onSair }: { usuario: Usuario; onSair: () => void }) {
+  const [trocandoSenha, setTrocandoSenha] = useState(false)
   const [filtro, setFiltro] = useState<Filtro>('todos')
   const [showArchive, setShowArchive] = useState(false)
   const [showAgenda, setShowAgenda] = useState(false)
@@ -230,6 +232,20 @@ export default function KanbanBoard() {
               >
                 <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
               </button>
+              <button
+                onClick={() => setTrocandoSenha(true)}
+                className="p-2 rounded-lg hover:bg-[rgba(0,229,255,0.08)] text-[#7a9bbf] hover:text-[#00e5ff] transition-colors"
+                title={`Trocar senha (${usuario.nome})`}
+              >
+                <KeyRound size={18} />
+              </button>
+              <button
+                onClick={onSair}
+                className="p-2 rounded-lg hover:bg-[rgba(0,229,255,0.08)] text-[#7a9bbf] hover:text-[#00e5ff] transition-colors"
+                title="Sair"
+              >
+                <LogOut size={18} />
+              </button>
             </div>
           </div>
 
@@ -307,6 +323,20 @@ export default function KanbanBoard() {
             >
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
             </button>
+            <button
+              onClick={() => setTrocandoSenha(true)}
+              className="p-2 rounded-lg hover:bg-[rgba(0,229,255,0.08)] text-[#7a9bbf] hover:text-[#00e5ff] transition-colors"
+              title={`Trocar senha (${usuario.nome})`}
+            >
+              <KeyRound size={16} />
+            </button>
+            <button
+              onClick={onSair}
+              className="p-2 rounded-lg hover:bg-[rgba(0,229,255,0.08)] text-[#7a9bbf] hover:text-[#00e5ff] transition-colors"
+              title="Sair"
+            >
+              <LogOut size={16} />
+            </button>
           </div>
         </div>
       </header>
@@ -322,7 +352,7 @@ export default function KanbanBoard() {
         )}
 
         {showAgenda ? (
-          <AgendaView tasks={tasks} isMobile={isMobile} onOpenTask={openEdit} />
+          <AgendaView tasks={tasks} isMobile={isMobile} usuario={usuario} onOpenTask={openEdit} />
         ) : loading && tasks.length === 0 ? (
           <div className="flex items-center justify-center h-64">
             <div className="flex flex-col items-center gap-3 text-[#7a9bbf]">
@@ -396,6 +426,8 @@ export default function KanbanBoard() {
       </main>
 
       {/* Modal */}
+      {trocandoSenha && <TrocarSenhaModal onClose={() => setTrocandoSenha(false)} />}
+
       {modalOpen && (
         <TaskModal
           task={editingTask}
